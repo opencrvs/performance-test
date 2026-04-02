@@ -1,0 +1,18 @@
+{
+  "name": "performance-test",
+  "version": "2.0.0",
+  "description": "Performance test definitions for OpenCRVS v2.x",
+  "main": "index.js",
+  "repository": "git@github.com:opencrvs/performance-test.git",
+  "author": "Riku Rouvila <riku@opencrvs.org>",
+  "license": "MPL-2.0",
+  "private": false,
+  "scripts": {
+    "generate-data": "tsx generate-data.ts"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^10.4.0",
+    "pg": "^8.20.0",
+    "tsx": "^4.21.0"
+  }
+}
