@@ -4,10 +4,11 @@
 
 - [Production-like](https://documentation.opencrvs.org/setup/3.-installation/3.3-set-up-a-server-hosted-environment#minimum-server-specifications) hardware configuration
 - OpenCRVS 2.x
-- Database with 1,000,000 records (~10 actions each)
-- 1,000 users
-- 30,000 administrative areas
-- 40,000 locations
+- Database with 
+  - 1,000,000 records (~10 actions each)
+  - 1,000 users
+  - 30,000 administrative areas
+  - 40,000 locations
 
 All tests are written in [k6](https://k6.io/) with TypeScript. Test scripts, seed data generators, and threshold configurations live in this repository. Each test run produces a k6 summary JSON that is compared against the baseline thresholds defined below.
 
