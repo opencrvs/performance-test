@@ -22,9 +22,14 @@ Searches, lookups, and queries backed by Elasticsearch or PostgreSQL indexes.
 
 | Operation                  | p50   | p95    | p99    |
 | -------------------------- | ----- | ------ | ------ |
+| Authenticate user          | 50ms  | 150ms  | 300ms  |
 | Search event by ID         | 50ms  | 150ms  | 300ms  |
-| Quick search (any UI query)| 50ms  | 150ms  | 300ms  |
-| Advanced search (complex)  | 50ms  | 150ms  | 300ms  |
+| Search with BRN            | 50ms  | 150ms  | 300ms  |
+| Search with name           | 50ms  | 150ms  | 300ms  |
+| Search with NID            | 50ms  | 150ms  | 300ms  |
+| Search by DoB and name     | 50ms  | 150ms  | 300ms  |
+| Search by record status    | 50ms  | 150ms  | 300ms  |
+| Search by flag             | 50ms  | 150ms  | 300ms  |
 | Find user by ID            | 50ms  | 150ms  | 300ms  |
 
 > The advanced search query to be used as benchmark is to be defined.
