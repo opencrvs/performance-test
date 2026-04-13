@@ -1,0 +1,44 @@
+name: Build and Push Perftest Image
+
+on:
+  push:
+    branches: ["*"]
+    tags: ["*"]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-24.04
+
+    permissions:
+      contents: read
+      packages: write
+    env:
+      image_path: ghcr.io/opencrvs/opencrvs-perftest-data-generator
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_PUBLISH_TOKEN }}
+      - name:
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            TAG_NAME="${GITHUB_REF#refs/tags/}"
+            echo "image_tag=${TAG_NAME}" >> $GITHUB_ENV
+          else
+            COMMIT_HASH=$(echo "${GITHUB_SHA}" | cut -c1-7)
+            echo "image_tag=${COMMIT_HASH}" >> $GITHUB_ENV
+          fi
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ env.image_path }}:${{ env.image_tag }} -f Dockerfile .
+
+      - name: Push Docker image
+        run: |
+          docker push ${{ env.image_path }}:${{ env.image_tag }}
+          docker tag ${{ env.image_path }}:${{ env.image_tag }} ${{ env.image_path }}:latest
+          docker push ${{ env.image_path }}:latest
