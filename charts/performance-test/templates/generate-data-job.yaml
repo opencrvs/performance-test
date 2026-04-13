@@ -1,10 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "perf-test-generator.fullname" . }}
-  annotations:
-    "helm.sh/hook": post-install,post-upgrade
-    "helm.sh/hook-delete-policy": before-hook-creation
+  name: {{ include "perf-test-generator.fullname" . }}-{{ .Release.Revision }}
 spec:
   backoffLimit: {{ .Values.job.backoffLimit }}
   ttlSecondsAfterFinished: {{ .Values.job.ttlSecondsAfterFinished }}
