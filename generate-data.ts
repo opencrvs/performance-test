@@ -1,16 +1,19 @@
 /**
- * Infinite tennis-club-membership event seeder.
+ * Tennis-club-membership event seeder.
  *
  * Inserts randomised events into app.events with varied action chains
  * into app.event_actions, directly via pg. Designed for local development only.
  *
  * Usage:
- *   yarn seed-events
+ *   yarn seed-events [--count <number>] [-n <number>]
+ *
+ * Options:
+ *   --count, -n  Total number of events to generate (default: unlimited)
  *
  * Environment variables:
  *   EVENTS_POSTGRES_URL  – default: postgres://events_app:app_password@localhost:5432/events
- *   BATCH_SIZE           – events per batch (default 50)
- *   SLEEP_MS             – pause between batches in ms (default 100)
+ *   BATCH_SIZE           – events per batch (default 100)
+ *   SLEEP_MS             – pause between batches in ms (default 0)
  */
 
 import { faker } from "@faker-js/faker";
@@ -25,6 +28,22 @@ const EVENTS_POSTGRES_URL =
 
 const BATCH_SIZE = Number(process.env.BATCH_SIZE) || 100;
 const SLEEP_MS = Number(process.env.SLEEP_MS) || 0;
+
+/** Parse --count / -n from CLI args. Returns Infinity when not set. */
+function parseMaxEvents(): number {
+  const args = process.argv.slice(2);
+  for (let i = 0; i < args.length; i++) {
+    if ((args[i] === "--count" || args[i] === "-n") && args[i + 1]) {
+      const n = Number(args[i + 1]);
+      if (Number.isFinite(n) && n > 0) return Math.floor(n);
+      console.error(`❌ Invalid value for ${args[i]}: "${args[i + 1]}"`);
+      process.exit(1);
+    }
+  }
+  return Infinity;
+}
+
+const MAX_EVENTS = parseMaxEvents();
 
 const EVENT_TYPE = "tennis-club-membership";
 
@@ -426,12 +445,17 @@ async function main() {
   let totalActions = 0;
   let batchNum = 0;
 
+  const limitLabel = Number.isFinite(MAX_EVENTS)
+    ? `${MAX_EVENTS} events`
+    : "∞ (unlimited)";
   console.log(
-    `\n🚀 Starting infinite seeder: ${BATCH_SIZE} events/batch, ${SLEEP_MS}ms pause\n` +
+    `\n🚀 Starting seeder: ${BATCH_SIZE} events/batch, ${SLEEP_MS}ms pause, target: ${limitLabel}\n` +
       `   Press Ctrl+C to stop gracefully.\n`
   );
 
-  while (!stopping) {
+  while (!stopping && totalEvents < MAX_EVENTS) {
+    // If we're near the limit, shrink the batch so we don't overshoot
+    const eventsThisBatch = Math.min(BATCH_SIZE, MAX_EVENTS - totalEvents);
     batchNum++;
     const client = await pool.connect();
 
@@ -445,7 +469,7 @@ async function main() {
 
       let paramIdx = 1;
 
-      for (let i = 0; i < BATCH_SIZE; i++) {
+      for (let i = 0; i < eventsThisBatch; i++) {
         const eventId = randomUUID();
         const trackingId = generateTrackingId();
         const txIdInit = `tmp-${randomUUID()}`;
@@ -585,11 +609,11 @@ async function main() {
       }
 
       await client.query("COMMIT");
-      totalEvents += BATCH_SIZE;
+      totalEvents += eventsThisBatch;
       const total = Date.now() - start;
       console.log(
-        `✅ Batch ${batchNum}: +${BATCH_SIZE} events | Total: ${totalEvents} events, ${totalActions} actions, took ${total}ms so ${Math.round(
-          total / BATCH_SIZE
+        `✅ Batch ${batchNum}: +${eventsThisBatch} events | Total: ${totalEvents} events, ${totalActions} actions, took ${total}ms so ${Math.round(
+          total / eventsThisBatch
         )}ms per event`
       );
     } catch (err) {
