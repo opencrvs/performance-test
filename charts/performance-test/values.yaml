@@ -1,0 +1,33 @@
+image:
+  repository: ghcr.io/opencrvs/opencrvs-perftest-data-generator
+  tag: latest
+  pullPolicy: Always
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+job:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 3600
+
+postgres:
+  user: events_app
+  password: app_password
+  host: postgres
+  port: 5432
+  database: events
+
+env:
+  batchSize: 100
+  sleepMs: 0
+  count: 1000
+resources: {}
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Optional: override command/args if your image does not already have the right entrypoint
+command: []
+args: []
