@@ -104,6 +104,12 @@ function advanceDate(d: Date): Date {
   return new Date(d.getTime() + hoursMs);
 }
 
+/** Advance a date by 1–5 seconds (for Requested→Accepted pairs). */
+function advanceDateBySeconds(d: Date): Date {
+  const secondsMs = (1 + Math.random() * 4) * 1000;
+  return new Date(d.getTime() + secondsMs);
+}
+
 // ─── Declaration generator ───────────────────────────────────────────────────
 
 function generateDeclaration(): object {
@@ -205,6 +211,7 @@ const CHAIN_TEMPLATES: ChainTemplate[] = [
     name: "draft",
     weight: 5,
     build: () => [
+      { actionType: "CREATE", status: "Requested", txGroup: "init" },
       { actionType: "CREATE", status: "Accepted", txGroup: "init" },
     ],
   },
@@ -214,7 +221,14 @@ const CHAIN_TEMPLATES: ChainTemplate[] = [
     name: "declared",
     weight: 15,
     build: ({ userId }) => [
+      { actionType: "CREATE", status: "Requested", txGroup: "init" },
       { actionType: "CREATE", status: "Accepted", txGroup: "init" },
+      {
+        actionType: "ASSIGN",
+        status: "Requested",
+        txGroup: "init",
+        extras: { assigned_to: userId },
+      },
       {
         actionType: "ASSIGN",
         status: "Accepted",
@@ -237,7 +251,14 @@ const CHAIN_TEMPLATES: ChainTemplate[] = [
     name: "declared-unassigned",
     weight: 8,
     build: ({ userId }) => [
+      { actionType: "CREATE", status: "Requested", txGroup: "init" },
       { actionType: "CREATE", status: "Accepted", txGroup: "init" },
+      {
+        actionType: "ASSIGN",
+        status: "Requested",
+        txGroup: "init",
+        extras: { assigned_to: userId },
+      },
       {
         actionType: "ASSIGN",
         status: "Accepted",
@@ -252,6 +273,7 @@ const CHAIN_TEMPLATES: ChainTemplate[] = [
         hasAnnotation: true,
       },
       { actionType: "DECLARE", status: "Accepted", txGroup: "main" },
+      { actionType: "UNASSIGN", status: "Requested", txGroup: "main" },
       { actionType: "UNASSIGN", status: "Accepted", txGroup: "main" },
     ],
   },
@@ -261,7 +283,14 @@ const CHAIN_TEMPLATES: ChainTemplate[] = [
     name: "registered",
     weight: 25,
     build: ({ userId, registrationNumber }) => [
+      { actionType: "CREATE", status: "Requested", txGroup: "init" },
       { actionType: "CREATE", status: "Accepted", txGroup: "init" },
+      {
+        actionType: "ASSIGN",
+        status: "Requested",
+        txGroup: "init",
+        extras: { assigned_to: userId },
+      },
       {
         actionType: "ASSIGN",
         status: "Accepted",
@@ -288,6 +317,7 @@ const CHAIN_TEMPLATES: ChainTemplate[] = [
         txGroup: "main",
         extras: { registration_number: registrationNumber },
       },
+      { actionType: "UNASSIGN", status: "Requested", txGroup: "main" },
       { actionType: "UNASSIGN", status: "Accepted", txGroup: "main" },
     ],
   },
@@ -297,7 +327,14 @@ const CHAIN_TEMPLATES: ChainTemplate[] = [
     name: "registered-printed",
     weight: 15,
     build: ({ userId, registrationNumber }) => [
+      { actionType: "CREATE", status: "Requested", txGroup: "init" },
       { actionType: "CREATE", status: "Accepted", txGroup: "init" },
+      {
+        actionType: "ASSIGN",
+        status: "Requested",
+        txGroup: "init",
+        extras: { assigned_to: userId },
+      },
       {
         actionType: "ASSIGN",
         status: "Accepted",
@@ -324,7 +361,9 @@ const CHAIN_TEMPLATES: ChainTemplate[] = [
         txGroup: "main",
         extras: { registration_number: registrationNumber },
       },
+      { actionType: "UNASSIGN", status: "Requested", txGroup: "main" },
       { actionType: "UNASSIGN", status: "Accepted", txGroup: "main" },
+      { actionType: "PRINT_CERTIFICATE", status: "Requested", txGroup: "main" },
       { actionType: "PRINT_CERTIFICATE", status: "Accepted", txGroup: "main" },
     ],
   },
@@ -440,42 +479,85 @@ async function main() {
         const declaration = generateDeclaration();
 
         let ts = baseDate;
-        for (const spec of specs) {
-          ts = advanceDate(ts);
+        let lastRequestedRow: unknown[] | null = null;
+        for (let si = 0; si < specs.length; si++) {
+          const spec = specs[si];
+          const prevSpec = si > 0 ? specs[si - 1] : null;
 
-          const actionId = randomUUID();
-          const txId = spec.txGroup === "init" ? txIdInit : txIdMain;
-          const actionUser = pick(userRows);
-          const locationId = pick(locationIds);
+          // Is this the Accepted half of a Requested→Accepted pair?
+          const isAcceptedHalf =
+            prevSpec &&
+            prevSpec.actionType === spec.actionType &&
+            prevSpec.status === "Requested" &&
+            spec.status === "Accepted";
 
-          actionRows.push([
-            actionId,
-            spec.actionType,
-            spec.status,
-            eventId,
-            actionUser.id,
-            actionUser.role,
-            "user",
-            locationId,
-            ts,
-            spec.extras?.assigned_to ?? null,
-            spec.extras?.registration_number ?? null,
-            spec.extras?.request_id ?? null,
-            txId,
-            spec.extras?.custom_action_type ?? null,
-            spec.extras?.content ? JSON.stringify(spec.extras.content) : "{}",
-            spec.hasAnnotation
-              ? JSON.stringify({
-                  "review.comment": faker.lorem.sentence(),
-                  "review.signature": null,
-                })
-              : null,
-            spec.hasDeclaration
-              ? JSON.stringify(declaration)
-              : JSON.stringify({}),
-            null, // original_action_id
-            null, // created_by_signature
-          ]);
+          // Use a small seconds delay for the Accepted half of a Requested→Accepted pair,
+          // otherwise advance by 1–48 hours between different actions.
+          if (isAcceptedHalf) {
+            ts = advanceDateBySeconds(ts);
+          } else {
+            ts = advanceDate(ts);
+          }
+
+          if (isAcceptedHalf && lastRequestedRow) {
+            // Clone the Requested row — identical except for id, status,
+            // created_at, and any status-dependent extras (e.g. registration_number).
+            const row = [...lastRequestedRow];
+            row[0] = randomUUID(); // id
+            row[2] = spec.status; // status → "Accepted"
+            row[8] = ts; // created_at
+            // Apply status-dependent extras on top of the clone
+            if (spec.extras?.assigned_to !== undefined)
+              row[9] = spec.extras.assigned_to;
+            if (spec.extras?.registration_number !== undefined)
+              row[10] = spec.extras.registration_number;
+            if (spec.extras?.request_id !== undefined)
+              row[11] = spec.extras.request_id;
+            if (spec.extras?.custom_action_type !== undefined)
+              row[13] = spec.extras.custom_action_type;
+            if (spec.extras?.content)
+              row[14] = JSON.stringify(spec.extras.content);
+            actionRows.push(row);
+            lastRequestedRow = null;
+          } else {
+            const actionId = randomUUID();
+            const txId = spec.txGroup === "init" ? txIdInit : txIdMain;
+            const actionUser = pick(userRows);
+            const locationId = pick(locationIds);
+
+            const row = [
+              actionId,
+              spec.actionType,
+              spec.status,
+              eventId,
+              actionUser.id,
+              actionUser.role,
+              "user",
+              locationId,
+              ts,
+              spec.extras?.assigned_to ?? null,
+              spec.extras?.registration_number ?? null,
+              spec.extras?.request_id ?? null,
+              txId,
+              spec.extras?.custom_action_type ?? null,
+              spec.extras?.content ? JSON.stringify(spec.extras.content) : "{}",
+              spec.hasAnnotation
+                ? JSON.stringify({
+                    "review.comment": faker.lorem.sentence(),
+                    "review.signature": null,
+                  })
+                : null,
+              spec.hasDeclaration
+                ? JSON.stringify(declaration)
+                : JSON.stringify({}),
+              null, // original_action_id
+              null, // created_by_signature
+            ];
+            actionRows.push(row);
+
+            // Remember Requested rows so the next Accepted can clone them
+            lastRequestedRow = spec.status === "Requested" ? row : null;
+          }
         }
 
         totalActions += specs.length;
