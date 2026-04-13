@@ -13,5 +13,6 @@ COPY --chown=node:node *.json .
 COPY --chown=node:node yarn.lock .
 
 RUN yarn install
+COPY --chown=node:node generate-data.ts .
 
 CMD ["yarn", "generate-data"]
