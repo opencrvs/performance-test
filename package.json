@@ -8,11 +8,20 @@
   "license": "MPL-2.0",
   "private": false,
   "scripts": {
-    "generate-data": "tsx generate-data.ts"
+    "generate-data": "tsx generate-data.ts",
+    "build": "node build.mjs",
+    "test:smoke": "yarn build smoke && k6 run dist/smoke.js",
+    "test:smoke:cloud": "yarn build smoke && k6 run --out cloud dist/smoke.js",
+    "test:load": "yarn build load && k6 run dist/load.js",
+    "test:load:cloud": "yarn build load && k6 run --out cloud dist/load.js"
   },
   "dependencies": {
     "@faker-js/faker": "^10.4.0",
     "pg": "^8.20.0",
     "tsx": "^4.21.0"
+  },
+  "devDependencies": {
+    "@types/k6": "^0.57.0",
+    "esbuild": "^0.24.0"
   }
 }
