@@ -30,10 +30,8 @@ export const options: Options = {
   iterations: 5,
   thresholds: smokeThresholds,
   // Tag this test run in Grafana Cloud
-  ext: {
-    loadimpact: {
-      name: 'OpenCRVS Smoke — tennis-club-membership',
-    },
+  cloud: {
+    name: 'OpenCRVS Smoke — tennis-club-membership',
   },
 };
 

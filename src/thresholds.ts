@@ -28,14 +28,14 @@ export const productionThresholds = {
   'http_req_duration{name:"auth.authenticate"}': slo(READ_SLO),
   'http_req_duration{name:"auth.verifyCode"}': slo(READ_SLO),
 
-  // Reads
+  // Reads — all search variants share the event.search procedure tag
   'http_req_duration{name:"event.search"}': slo(READ_SLO),
   'http_req_duration{name:"event.get"}': slo(READ_SLO),
 
   // Writes
   'http_req_duration{name:"event.create"}': slo(WRITE_SLO),
   'http_req_duration{name:"event.actions.declare.request"}': slo(WRITE_SLO),
-  'http_req_duration{name:"event.actions.assign.request"}': slo(WRITE_SLO),
+  'http_req_duration{name:"event.actions.assignment.assign"}': slo(WRITE_SLO),
   'http_req_duration{name:"event.actions.register.request"}': slo(WRITE_SLO),
 
   // Overall error rate

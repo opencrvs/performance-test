@@ -11,9 +11,9 @@
     "generate-data": "tsx generate-data.ts",
     "build": "node build.mjs",
     "test:smoke": "yarn build smoke && k6 run dist/smoke.js",
-    "test:smoke:cloud": "yarn build smoke && k6 run --out cloud dist/smoke.js",
+    "test:smoke:cloud": "yarn build smoke && export $(grep -v '^#' .env | xargs) && k6 run --out cloud dist/smoke.js",
     "test:load": "yarn build load && k6 run dist/load.js",
-    "test:load:cloud": "yarn build load && k6 run --out cloud dist/load.js"
+    "test:load:cloud": "yarn build load && export $(grep -v '^#' .env | xargs) && k6 run --out cloud dist/load.js"
   },
   "dependencies": {
     "@faker-js/faker": "^10.4.0",
