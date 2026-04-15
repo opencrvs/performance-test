@@ -1,4 +1,4 @@
-name: Build and Push Perftest Image
+name: Build and Push Data Generator Image
 
 on:
   push:
@@ -13,7 +13,7 @@ jobs:
       contents: read
       packages: write
     env:
-      image_path: ghcr.io/opencrvs/opencrvs-perftest
+      image_path: ghcr.io/opencrvs/opencrvs-data-generator
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
