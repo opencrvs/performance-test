@@ -1,0 +1,56 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "perf-test-generator.fullname" . }}-{{ .Release.Revision }}
+spec:
+  backoffLimit: {{ .Values.job.backoffLimit }}
+  ttlSecondsAfterFinished: {{ .Values.job.ttlSecondsAfterFinished }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "perf-test-generator.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      restartPolicy: Never
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: generator
+          args:
+            - run
+            - /app/smoke.js
+            - --out
+            - cloud
+          {{- range $k, $v := .Values.env }}
+            - -e
+            - {{ $k }}={{ $v }}
+          {{- end }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: K6_CLOUD_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "perf-test-generator.fullname" . }}-db
+                  key: K6_CLOUD_TOKEN
+            - name: K6_CLOUD_PROJECT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "perf-test-generator.fullname" . }}-db
+                  key: K6_CLOUD_PROJECT_ID
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
