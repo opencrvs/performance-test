@@ -12,7 +12,7 @@ COPY --chown=node:node yarn.lock .
 COPY --chown=node:node build.mjs .
 COPY --chown=node:node src ./src
 COPY --chown=node:node tests ./tests
-RUN yarn install && yarn build smoke
+RUN yarn install && yarn build
 
 FROM grafana/k6:latest
 WORKDIR /app

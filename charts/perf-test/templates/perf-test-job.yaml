@@ -29,7 +29,7 @@ spec:
             {{- toYaml .Values.command | nindent 10 }}
           {{- else }}
             - run
-            - /app/smoke.js
+            - /app/{{ .Values.k6_script }}.js
             - --out
             - cloud
           {{- range $k, $v := .Values.k6_env_args }}

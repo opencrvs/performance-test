@@ -21,6 +21,8 @@ affinity: {}
 command: []
 args: []
 
+k6_script: "smoke"
+
 k6_env_args:
   GATEWAY_URL: "http://opencrvs-gateway:3000"
 
