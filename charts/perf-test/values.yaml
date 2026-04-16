@@ -21,7 +21,7 @@ affinity: {}
 command: []
 args: []
 
-env:
+k6_env_args:
   GATEWAY_URL: "http://opencrvs-gateway:3000"
 
 k6_cloud_project_id: ""

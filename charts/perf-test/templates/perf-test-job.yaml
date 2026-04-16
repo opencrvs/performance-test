@@ -18,14 +18,24 @@ spec:
       {{- end }}
       containers:
         - name: generator
+          command:
+          {{- if .Values.command }}
+            {{- toYaml .Values.command | nindent 10 }}
+          {{- else }}
+            ["k6"]
+          {{- end }}
           args:
+          {{- if .Values.command }}
+            {{- toYaml .Values.command | nindent 10 }}
+          {{- else }}
             - run
             - /app/smoke.js
             - --out
             - cloud
-          {{- range $k, $v := .Values.env }}
+          {{- range $k, $v := .Values.k6_env_args }}
             - -e
             - {{ $k }}={{ $v }}
+          {{- end }}
           {{- end }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
