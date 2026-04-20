@@ -14,11 +14,16 @@ COPY --chown=node:node src ./src
 COPY --chown=node:node tests ./tests
 RUN yarn install && yarn build
 
-FROM grafana/xk6:latest
-
+FROM grafana/xk6:latest AS k6-builder
+WORKDIR /app
 # https://grafana.com/docs/k6/latest/results-output/real-time/elasticsearch/
 # https://hub.docker.com/r/grafana/xk6/
 # Build the k6 binary
 RUN xk6 build --with github.com/elastic/xk6-output-elasticsearch
+RUN ls -la /app
+
+FROM alpine:latest
 WORKDIR /app
+COPY --from=k6-builder /app/k6 /usr/bin/k6
 COPY --from=base /app/dist /app
+ENTRYPOINT ["/usr/bin/k6"]
