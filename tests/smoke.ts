@@ -73,7 +73,7 @@ export default function () {
 
 export function handleSummary(data: unknown) {
   return {
-    stdout: textSummary(data, { indent: ' ', enableColors: true }),
+    stdout: textSummary(data, { indent: ' ', enableColors: false }),
     'summary.json': JSON.stringify(data),
   };
 }
