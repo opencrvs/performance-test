@@ -19,9 +19,6 @@
  *
  * Run locally:
  *   yarn test:soak
- *
- * Run with Grafana Cloud reporting:
- *   yarn test:soak:cloud   (requires K6_CLOUD_TOKEN env var)
  */
 
 import { check, sleep } from 'k6';
@@ -72,7 +69,6 @@ export const options: Options = {
     ...productionThresholds,
   },
 
-  ...(__ENV.K6_CLOUD_TOKEN ? { cloud: { name: 'OpenCRVS Soak — tennis-club-membership' } } : {}),
 };
 
 // ─── Per-VU session ───────────────────────────────────────────────────────────

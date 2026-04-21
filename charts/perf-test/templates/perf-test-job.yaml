@@ -39,17 +39,6 @@ spec:
           {{- end }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          env:
-            - name: K6_CLOUD_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "perf-test-generator.fullname" . }}-db
-                  key: K6_CLOUD_TOKEN
-            - name: K6_CLOUD_PROJECT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "perf-test-generator.fullname" . }}-db
-                  key: K6_CLOUD_PROJECT_ID
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

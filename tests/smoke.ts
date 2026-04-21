@@ -6,9 +6,6 @@
  *
  * Run locally:
  *   yarn test:smoke
- *
- * Run with Grafana Cloud reporting:
- *   yarn test:smoke:cloud        (requires K6_CLOUD_TOKEN env var)
  */
 
 import { check, sleep } from 'k6';
@@ -29,10 +26,6 @@ export const options: Options = {
   vus: 1,
   iterations: 5,
   thresholds: smokeThresholds,
-  // Only include cloud metadata when the token is present.
-  // k6 auto-enables cloud output when both K6_CLOUD_TOKEN and a cloud block
-  // exist — without this guard a local run would stream to Grafana Cloud.
-  ...(__ENV.K6_CLOUD_TOKEN ? { cloud: { name: 'OpenCRVS Smoke — tennis-club-membership' } } : {}),
 };
 
 // Per-VU session — initialised on first iteration, reused for the rest.

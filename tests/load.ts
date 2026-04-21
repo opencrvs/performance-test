@@ -14,9 +14,6 @@
  *
  * Run locally:
  *   yarn test:load
- *
- * Run with Grafana Cloud reporting:
- *   yarn test:load:cloud   (requires K6_CLOUD_TOKEN env var)
  */
 
 import { check, sleep } from 'k6';
@@ -100,10 +97,6 @@ export const options: Options = {
     ],
   },
 
-  // Only include cloud metadata when the token is present.
-  // k6 auto-enables cloud output when both K6_CLOUD_TOKEN and a cloud block
-  // exist — without this guard a local run would stream to Grafana Cloud.
-  ...(__ENV.K6_CLOUD_TOKEN ? { cloud: { name: 'OpenCRVS Load — tennis-club-membership' } } : {}),
 };
 
 // ─── Per-VU session ───────────────────────────────────────────────────────────
