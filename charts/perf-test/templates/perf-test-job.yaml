@@ -30,8 +30,10 @@ spec:
           {{- else }}
             - run
             - /app/{{ .Values.k6_script }}.js
+          {{- if .Values.k6_output }}
             - --out
-            - cloud
+            - {{ .Values.k6_output }}
+          {{- end }}
           {{- range $k, $v := .Values.k6_env_args }}
             - -e
             - {{ $k }}={{ $v }}
@@ -39,6 +41,21 @@ spec:
           {{- end }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          {{- range $k, $v := .Values.env }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+          {{- end }}
+          {{- range $secretName, $mappings := .Values.perf_test.secrets }}
+          {{- range $mappings }}
+          {{- $parts := splitList ":" . }}
+            - name: {{ index $parts 1 }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $secretName }}
+                  key: {{ index $parts 0 }}
+          {{- end }}
+          {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
