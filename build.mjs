@@ -21,6 +21,6 @@ await esbuild.build({
   target: 'es2015',
   outdir: 'dist',
   // k6 built-in modules must stay external — not bundled
-  external: ['k6', 'k6/*'],
+  external: ['k6', 'k6/*', 'https://jslib.k6.io/*'],
   logLevel: 'info',
 });

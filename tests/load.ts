@@ -17,6 +17,7 @@
  */
 
 import { check, sleep } from 'k6';
+import { textSummary } from 'https://jslib.k6.io/k6-summary/0.0.2/index.js';
 import type { Options } from 'k6/options';
 import { authenticate, type Session } from '../src/auth';
 import {
@@ -157,4 +158,11 @@ export function normalVU(): void {
 
 export function highLatencyVU(): void {
   runWorkflow(true);
+}
+
+export function handleSummary(data: unknown) {
+  return {
+    stdout: textSummary(data, { indent: ' ', enableColors: true }),
+    'summary.json': JSON.stringify(data),
+  };
 }

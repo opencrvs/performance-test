@@ -2,6 +2,9 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ include "perf-test-generator.fullname" . }}-{{ .Release.Revision }}
+  labels:
+    app.kubernetes.io/name: {{ include "perf-test-generator.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   backoffLimit: {{ .Values.job.backoffLimit }}
   ttlSecondsAfterFinished: {{ .Values.job.ttlSecondsAfterFinished }}
