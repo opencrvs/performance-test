@@ -50,16 +50,16 @@ const MAX_VUS = parseInt(__ENV.MAX_VUS ?? '300', 10);
  */
 const TOTAL_STAGES = [
   { duration: '2m', target: 5 },
-  { duration: '5m', target: 5 },
-  { duration: '3m', target: 5 },
-  { duration: '5m', target: 5 },
-  { duration: '3m', target: 5 },
-  { duration: '5m', target: 5 },
   { duration: '5m', target: 10 },
-  { duration: '5m', target: 10 },
-  { duration: '5m', target: 10 },
-  { duration: '10m', target: 10 },
-];
+  { duration: '3m', target: 15 },
+  { duration: '5m', target: 20 },
+  { duration: '3m', target: 25 },
+  { duration: '5m', target: 30 },
+  { duration: '5m', target: 35 },
+  { duration: '5m', target: 40 },
+  { duration: '5m', target: 45 },
+  { duration: '10m', target: 50 }
+]
 
 function split(fraction: number) {
   return TOTAL_STAGES.map((s) => ({
