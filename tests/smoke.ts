@@ -8,72 +8,73 @@
  *   yarn test:smoke
  */
 
-import { check, sleep } from 'k6';
-import { textSummary } from 'https://jslib.k6.io/k6-summary/0.0.2/index.js';
-import type { Options } from 'k6/options';
-import { authenticate, type Session } from '../src/auth';
+import { check, sleep } from 'k6'
+import { textSummary } from 'https://jslib.k6.io/k6-summary/0.0.2/index.js'
+import type { Options } from 'k6/options'
+import { authenticate, type Session } from '../src/auth'
 import {
   assignEvent,
   createEvent,
   declareEvent,
   registerEvent,
-  searchByTrackingId,
-} from '../src/client';
-import { generateDeclaration } from '../src/data';
-import { config } from '../src/config';
-import { smokeThresholds } from '../src/thresholds';
+  searchByTrackingId
+} from '../src/client'
+import { generateDeclaration } from '../src/data'
+import { config } from '../src/config'
+import { smokeThresholds } from '../src/thresholds'
 
 export const options: Options = {
   vus: 1,
   iterations: 5,
-  thresholds: smokeThresholds,
-};
+  thresholds: smokeThresholds
+}
 
 // Per-VU session — initialised on first iteration, reused for the rest.
-let session: Session;
+let session: Session
 
 export default function () {
   // ── Auth (once per VU) ────────────────────────────────────────────────────
   if (!session) {
-    session = authenticate(config.gatewayUrl, config.username, config.password);
+    session = authenticate(config.gatewayUrl, config.username, config.password)
   }
-  const { token, userId } = session;
+  const { token, userId } = session
 
   // ── Step 1: Create event ──────────────────────────────────────────────────
-  const event = createEvent(token);
+  const event = createEvent(token)
 
   check(event, {
     'event created: has id': (e) => Boolean(e?.id),
-    'event created: has trackingId': (e) => Boolean(e?.trackingId),
-  });
+    'event created: has trackingId': (e) => Boolean(e?.trackingId)
+  })
 
   if (!event?.id) {
-    console.error('createEvent returned no id — skipping iteration');
-    return;
+    console.error('createEvent returned no id — skipping iteration')
+    return
   }
 
   // ── Step 2: Declare ───────────────────────────────────────────────────────
-  declareEvent(token, event.id, generateDeclaration());
+  const declaration = generateDeclaration()
+  declareEvent(token, event.id, declaration)
 
   // ── Step 3: Search for the event ──────────────────────────────────────────
-  const searchResult = searchByTrackingId(token, event.trackingId);
+  const searchResult = searchByTrackingId(token, event.trackingId)
 
   check(searchResult, {
-    'search: event found': (r) => r?.total > 0,
-  });
+    'search: event found': (r) => r?.total > 0
+  })
 
   // ── Step 4: Assign to self ────────────────────────────────────────────────
-  assignEvent(token, event.id, userId);
+  assignEvent(token, event.id, userId)
 
   // ── Step 5: Register ──────────────────────────────────────────────────────
-  registerEvent(token, event.id);
+  registerEvent(token, event.id, declaration)
 
-  sleep(1);
+  sleep(1)
 }
 
 export function handleSummary(data: unknown) {
   return {
     stdout: textSummary(data, { indent: ' ', enableColors: false }),
-    'summary.json': JSON.stringify(data),
-  };
+    'summary.json': JSON.stringify(data)
+  }
 }
