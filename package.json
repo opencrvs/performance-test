@@ -15,7 +15,9 @@
     "test:load": "yarn build load && k6 run dist/load.js",
     "test:load:cloud": "yarn build load && export $(grep -v '^#' .env | xargs) && MAX_VUS=${MAX_VUS:-100} k6 run --out cloud dist/load.js",
     "test:soak": "yarn build soak && k6 run dist/soak.js",
-    "test:soak:cloud": "yarn build soak && export $(grep -v '^#' .env | xargs) && k6 run --out cloud dist/soak.js"
+    "test:soak:cloud": "yarn build soak && export $(grep -v '^#' .env | xargs) && k6 run --out cloud dist/soak.js",
+    "test:spike": "yarn build spike && k6 run dist/spike.js",
+    "test:spike:cloud": "yarn build spike && export $(grep -v '^#' .env | xargs) && k6 run --out cloud dist/spike.js"
   },
   "dependencies": {
     "@faker-js/faker": "^10.4.0",
