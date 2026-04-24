@@ -24,7 +24,10 @@ function call(token: string, procedure: string, input: object) {
     JSON.stringify({ '0': { json: input } }),
     { headers: headers(token), tags: { name: procedure } }
   )
-  check(res, { [`${procedure}: status 200`]: (r) => r.status === 200 })
+  const ok = check(res, { [`${procedure}: status 200`]: (r) => r.status === 200 })
+  if (!ok) {
+    console.error(`${procedure} ${res.status}: ${String(res.body).substring(0, 300)}`)
+  }
   return res
 }
 
@@ -38,7 +41,10 @@ function query(token: string, procedure: string, input: object) {
     `${config.eventsUrl}/${procedure}?batch=1&input=${encoded}`,
     { headers: headers(token), tags: { name: procedure } }
   )
-  check(res, { [`${procedure}: status 200`]: (r) => r.status === 200 })
+  const ok = check(res, { [`${procedure}: status 200`]: (r) => r.status === 200 })
+  if (!ok) {
+    console.error(`${procedure} ${res.status}: ${String(res.body).substring(0, 300)}`)
+  }
   return res
 }
 

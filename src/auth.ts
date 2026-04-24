@@ -4,6 +4,7 @@ import { b64decode } from 'k6/encoding';
 export interface Session {
   token: string;
   userId: string;
+  expiresAt: number; // Unix seconds
 }
 
 /**
@@ -40,14 +41,13 @@ export function authenticate(gatewayUrl: string, username: string, password: str
   }
 
   const { token } = verifyRes.json() as { token: string };
-  const userId = decodeJwtSub(token);
+  const { sub: userId, exp: expiresAt } = decodeJwtPayload(token);
 
-  return { token, userId };
+  return { token, userId, expiresAt };
 }
 
-/** Extracts the `sub` claim from a JWT without verifying the signature. */
-function decodeJwtSub(token: string): string {
+function decodeJwtPayload(token: string): { sub: string; exp: number } {
   const payload = token.split('.')[1];
   const json = b64decode(payload, 'rawurl', 's') as string;
-  return (JSON.parse(json) as { sub: string }).sub;
+  return JSON.parse(json) as { sub: string; exp: number };
 }
