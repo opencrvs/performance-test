@@ -42,6 +42,7 @@ Includes the database write and synchronous event handling. Country config is co
 | ---------------------- | ------ | ------ | ------ |
 | Create declare action  | 100ms  | 300ms  | 500ms  |
 | Register event         | 100ms  | 300ms  | 500ms  |
+| Upload an attachment   | 100ms  | 300ms  | 500ms  |
 
 ### Reindexing
 
