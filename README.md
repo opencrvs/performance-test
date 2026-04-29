@@ -36,7 +36,7 @@ Searches, lookups, and queries backed by Elasticsearch or PostgreSQL indexes.
 
 ### Write operations
 
-Includes the database write and synchronous event handling. Country config is configured to acknowledge without intercepting.
+Includes the database write and synchronous event handling. Country config is configured to acknowledge without intercepting. In practice this means country config returns 200 OK for all action confirmation requests without performing any additional processing.
 
 | Operation              | p50    | p95    | p99    |
 | ---------------------- | ------ | ------ | ------ |
