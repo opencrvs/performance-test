@@ -101,6 +101,7 @@ function runWorkflow(highLatency: boolean): void {
   const declaration = generateDeclaration()
   declareEvent(token, event.id, declaration)
   networkDelay()
+  sleep(1.5)
 
   const result = searchByTrackingId(token, event.trackingId)
   check(result, { 'search: event found': (r) => r?.total > 0 })

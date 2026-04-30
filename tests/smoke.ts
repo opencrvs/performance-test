@@ -57,6 +57,7 @@ export default function () {
   declareEvent(token, event.id, declaration)
 
   // ── Step 3: Search for the event ──────────────────────────────────────────
+  sleep(1.5)
   const searchResult = searchByTrackingId(token, event.trackingId)
 
   check(searchResult, {
