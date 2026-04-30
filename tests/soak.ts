@@ -24,7 +24,7 @@
 import { check, sleep } from 'k6'
 import { textSummary } from 'https://jslib.k6.io/k6-summary/0.0.2/index.js'
 import type { Options } from 'k6/options'
-import { authenticate, type Session } from '../src/auth'
+import { getSession } from '../src/session'
 import {
   assignEvent,
   createEvent,
@@ -33,7 +33,6 @@ import {
   searchByTrackingId
 } from '../src/client'
 import { generateDeclaration } from '../src/data'
-import { config } from '../src/config'
 import { productionThresholds } from '../src/thresholds'
 
 // ─── VU counts ────────────────────────────────────────────────────────────────
@@ -73,16 +72,6 @@ export const options: Options = {
 
 // ─── Per-VU session ───────────────────────────────────────────────────────────
 
-// Module-level vars are scoped per-VU in k6.
-// Each VU authenticates once on its first iteration and reuses the token.
-let session: Session
-
-function getSession(): Session {
-  if (!session) {
-    session = authenticate(config.gatewayUrl, config.username, config.password)
-  }
-  return session
-}
 
 // ─── Workflow ─────────────────────────────────────────────────────────────────
 

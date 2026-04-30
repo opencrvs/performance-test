@@ -11,7 +11,7 @@
 import { check, sleep } from 'k6'
 import { textSummary } from 'https://jslib.k6.io/k6-summary/0.0.2/index.js'
 import type { Options } from 'k6/options'
-import { authenticate, type Session } from '../src/auth'
+import { getSession } from '../src/session'
 import {
   assignEvent,
   createEvent,
@@ -20,7 +20,6 @@ import {
   searchByTrackingId
 } from '../src/client'
 import { generateDeclaration } from '../src/data'
-import { config } from '../src/config'
 import { smokeThresholds } from '../src/thresholds'
 
 export const options: Options = {
@@ -29,15 +28,8 @@ export const options: Options = {
   thresholds: smokeThresholds
 }
 
-// Per-VU session — initialised on first iteration, reused for the rest.
-let session: Session
-
 export default function () {
-  // ── Auth (once per VU) ────────────────────────────────────────────────────
-  if (!session) {
-    session = authenticate(config.gatewayUrl, config.username, config.password)
-  }
-  const { token, userId } = session
+  const { token, userId } = getSession()
 
   // ── Step 1: Create event ──────────────────────────────────────────────────
   const event = createEvent(token)

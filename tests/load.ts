@@ -19,7 +19,7 @@
 import { check, sleep } from 'k6'
 import { textSummary } from 'https://jslib.k6.io/k6-summary/0.0.2/index.js'
 import type { Options } from 'k6/options'
-import { authenticate, type Session } from '../src/auth'
+import { getSession } from '../src/session'
 import {
   assignEvent,
   createEvent,
@@ -28,7 +28,6 @@ import {
   searchByTrackingId
 } from '../src/client'
 import { generateDeclaration } from '../src/data'
-import { config } from '../src/config'
 import { productionThresholds } from '../src/thresholds'
 
 // ─── Ramp stages ──────────────────────────────────────────────────────────────
@@ -102,24 +101,6 @@ export const options: Options = {
   }
 }
 
-// ─── Per-VU session ───────────────────────────────────────────────────────────
-
-// Module-level vars are scoped per-VU in k6.
-let session: Session
-
-function getSession(): Session {
-  const nowSec = Date.now() / 1000
-  const needsAuth = !session || session.expiresAt - nowSec < 60
-
-  if (needsAuth) {
-    // Spread initial auth bursts across 2 s to avoid a thundering herd at
-    // stage transitions when many VUs start simultaneously.
-    if (!session) sleep(Math.random() * 2)
-    session = authenticate(config.gatewayUrl, config.username, config.password)
-  }
-
-  return session
-}
 
 // ─── Workflow ─────────────────────────────────────────────────────────────────
 

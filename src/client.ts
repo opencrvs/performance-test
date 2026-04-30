@@ -35,7 +35,7 @@ function call(token: string, procedure: string, input: object) {
  * tRPC query (GET).
  * Wire format: GET {eventsUrl}/{procedure}?batch=1&input=<encoded>
  */
-function query(token: string, procedure: string, input: object) {
+function query(token: string, procedure: string, input: object | string) {
   const encoded = encodeURIComponent(JSON.stringify({ '0': { json: input } }))
   const res = http.get(
     `${config.eventsUrl}/${procedure}?batch=1&input=${encoded}`,
