@@ -24,6 +24,7 @@ import {
   assignEvent,
   createEvent,
   declareEvent,
+  findUser,
   registerEvent,
   searchByTrackingId
 } from '../src/client'
@@ -86,6 +87,13 @@ export const options: Options = {
       executor: 'ramping-vus',
       stages: split(0.2),
       exec: 'highLatencyVU',
+      startVUs: 0
+    },
+    /** 10% of VUs — standalone user lookups to measure read-path SLO. */
+    userLookup: {
+      executor: 'ramping-vus',
+      stages: split(0.1),
+      exec: 'userLookupVU',
       startVUs: 0
     }
   },
@@ -151,6 +159,12 @@ export function normalVU(): void {
 
 export function highLatencyVU(): void {
   runWorkflow(true)
+}
+
+export function userLookupVU(): void {
+  const { token, userId } = getSession()
+  findUser(token, userId)
+  sleep(1)
 }
 
 export function handleSummary(data: unknown) {

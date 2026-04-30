@@ -29,6 +29,7 @@ import {
   assignEvent,
   createEvent,
   declareEvent,
+  findUser,
   registerEvent,
   searchByTrackingId
 } from '../src/client'
@@ -43,7 +44,8 @@ import { productionThresholds } from '../src/thresholds'
  */
 const TOTAL_VUS = parseInt(__ENV.SOAK_VUS ?? '50', 10)
 const NORMAL_VUS = Math.round(TOTAL_VUS * 0.8)
-const HIGH_LATENCY_VUS = TOTAL_VUS - NORMAL_VUS
+const HIGH_LATENCY_VUS = Math.round(TOTAL_VUS * 0.2)
+const USER_LOOKUP_VUS = Math.max(1, Math.round(TOTAL_VUS * 0.1))
 
 // ─── Options ──────────────────────────────────────────────────────────────────
 
@@ -62,6 +64,13 @@ export const options: Options = {
       vus: HIGH_LATENCY_VUS,
       duration: '8h',
       exec: 'highLatencyVU'
+    },
+    /** 10% of VUs — standalone user lookups to measure read-path SLO. */
+    userLookup: {
+      executor: 'constant-vus',
+      vus: USER_LOOKUP_VUS,
+      duration: '8h',
+      exec: 'userLookupVU'
     }
   },
 
@@ -114,6 +123,12 @@ export function normalVU(): void {
 
 export function highLatencyVU(): void {
   runWorkflow(true)
+}
+
+export function userLookupVU(): void {
+  const { token, userId } = getSession()
+  findUser(token, userId)
+  sleep(1)
 }
 
 export function handleSummary(data: unknown) {

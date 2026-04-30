@@ -27,6 +27,7 @@ export const productionThresholds = {
   // Reads — all search variants share the event.search procedure tag
   'http_req_duration{name:"event.search"}': slo(READ_SLO),
   'http_req_duration{name:"event.get"}': slo(READ_SLO),
+  'http_req_duration{name:"user.get"}': slo(READ_SLO),
 
   // Writes
   'http_req_duration{name:"event.create"}': slo(WRITE_SLO),

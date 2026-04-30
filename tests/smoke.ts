@@ -16,6 +16,7 @@ import {
   assignEvent,
   createEvent,
   declareEvent,
+  findUser,
   registerEvent,
   searchByTrackingId
 } from '../src/client'
@@ -61,6 +62,9 @@ export default function () {
 
   // ── Step 5: Register ──────────────────────────────────────────────────────
   registerEvent(token, event.id, declaration)
+
+  // ── Step 6: Find user ─────────────────────────────────────────────────────
+  findUser(token, userId)
 
   sleep(1)
 }

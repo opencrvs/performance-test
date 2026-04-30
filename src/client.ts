@@ -74,6 +74,11 @@ export function getEvent(token: string, eventId: string): unknown {
   return unwrap<unknown>(res)
 }
 
+export function findUser(token: string, userId: string): unknown {
+  const res = query(token, 'user.get', userId)
+  return unwrap<unknown>(res)
+}
+
 // ─── Search operations ────────────────────────────────────────────────────────
 
 export interface SearchResult {
