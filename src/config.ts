@@ -17,6 +17,6 @@ export const config = {
   /** Gateway base URL used for auth endpoints (/auth/authenticate, /auth/verifyCode). */
   gatewayUrl: __ENV.GATEWAY_URL ?? 'http://localhost:7070',
 
-  username: __ENV.CRVS_USERNAME ?? 'v.tortesmj',
+  username: __ENV.CRVS_USERNAME ?? 'r.flnrtzbz',
   password: __ENV.CRVS_PASSWORD ?? 'test'
 }
