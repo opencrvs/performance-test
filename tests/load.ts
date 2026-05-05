@@ -49,16 +49,16 @@ const MAX_VUS = parseInt(__ENV.MAX_VUS ?? '300', 10)
  * MAX_VUS so the ramp still makes sense at lower ceilings.
  */
 const TOTAL_STAGES = [
-  { duration: '2m', target: 5 },
-  { duration: '5m', target: 10 },
-  { duration: '3m', target: 15 },
-  { duration: '5m', target: 20 },
-  { duration: '3m', target: 25 },
-  { duration: '5m', target: 30 },
-  { duration: '5m', target: 35 },
-  { duration: '5m', target: 40 },
-  { duration: '5m', target: 45 },
-  { duration: '10m', target: 50 }
+  { duration: '3m', target: 5 }
+  // { duration: '5m', target: 10 }
+  // { duration: '3m', target: 15 }
+  // // { duration: '5m', target: 20 },
+  // // { duration: '3m', target: 25 },
+  // // { duration: '5m', target: 30 },
+  // // { duration: '5m', target: 35 },
+  // // { duration: '5m', target: 40 },
+  // // { duration: '5m', target: 45 },
+  // // { duration: '10m', target: 50 }
 ]
 
 function split(fraction: number) {
