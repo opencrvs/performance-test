@@ -13,6 +13,9 @@ const READ_SLO = { p50: 150, p95: 450, p99: 900 }
 /** Write operations: declare, register */
 const WRITE_SLO = { p50: 300, p95: 900, p99: 1500 }
 
+/** Find user by ID — tighter SLO per README baseline */
+const USER_LOOKUP_SLO = { p50: 50, p95: 150, p99: 300 }
+
 function slo(op: typeof READ_SLO) {
   return [`p(50)<${op.p50}`, `p(95)<${op.p95}`, `p(99)<${op.p99}`]
 }
@@ -27,7 +30,7 @@ export const productionThresholds = {
   // Reads — all search variants share the event.search procedure tag
   'http_req_duration{name:"event.search"}': slo(READ_SLO),
   'http_req_duration{name:"event.get"}': slo(READ_SLO),
-  'http_req_duration{name:"user.get"}': slo(READ_SLO),
+  'http_req_duration{name:"user.get"}': slo(USER_LOOKUP_SLO),
 
   // Writes
   'http_req_duration{name:"event.create"}': slo(WRITE_SLO),
