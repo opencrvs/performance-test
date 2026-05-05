@@ -1,5 +1,6 @@
 import http from 'k6/http'
 import { check } from 'k6'
+import { v4 as uuidv4 } from 'uuid'
 import { config } from './config'
 import type { TennisClubDeclaration } from './data'
 
@@ -63,7 +64,7 @@ export interface EventRef {
 
 export function createEvent(token: string): EventRef {
   const res = call(token, 'event.create', {
-    transactionId: crypto.randomUUID(),
+    transactionId: uuidv4(),
     type: 'tennis-club-membership'
   })
   return unwrap<EventRef>(res)
@@ -167,7 +168,7 @@ export function declareEvent(
 ): void {
   call(token, 'event.actions.declare.request', {
     eventId,
-    transactionId: crypto.randomUUID(),
+    transactionId: uuidv4(),
     declaration
   })
 }
@@ -180,7 +181,7 @@ export function assignEvent(
   call(token, 'event.actions.assignment.assign', {
     type: 'ASSIGN',
     eventId,
-    transactionId: crypto.randomUUID(),
+    transactionId: uuidv4(),
     assignedTo,
     declaration: {}
   })
@@ -194,7 +195,7 @@ export function registerEvent(
   call(token, 'event.actions.register.request', {
     type: 'REGISTER',
     eventId,
-    transactionId: crypto.randomUUID(),
+    transactionId: uuidv4(),
     declaration
   })
 }
