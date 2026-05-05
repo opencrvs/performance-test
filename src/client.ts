@@ -57,10 +57,14 @@ function query(token: string, procedure: string, input: object | string) {
   return res
 }
 
-/** Extracts the result payload from a tRPC batch+SuperJSON response. */
-function unwrap<T>(res: ReturnType<typeof http.post>): T {
-  const batch = res.json() as Array<{ result: { data: { json: T } } }>
-  return batch[0]?.result?.data?.json
+/** Extracts the result payload from a tRPC batch+SuperJSON response. Returns null on non-JSON or unexpected shape. */
+function unwrap<T>(res: ReturnType<typeof http.post>): T | null {
+  try {
+    const batch = res.json() as Array<{ result: { data: { json: T } } }>
+    return batch[0]?.result?.data?.json ?? null
+  } catch {
+    return null
+  }
 }
 
 // ─── Event CRUD ───────────────────────────────────────────────────────────────
@@ -70,7 +74,7 @@ export interface EventRef {
   trackingId: string
 }
 
-export function createEvent(token: string): EventRef {
+export function createEvent(token: string): EventRef | null {
   const res = call(token, 'event.create', {
     transactionId: uuidv4(),
     type: 'tennis-club-membership'
@@ -97,7 +101,7 @@ export interface SearchResult {
 
 const EVENT_TYPE = 'tennis-club-membership'
 
-function search(token: string, clause: object): SearchResult {
+function search(token: string, clause: object): SearchResult | null {
   const res = call(token, 'event.search', {
     query: { type: 'and', clauses: [{ eventType: EVENT_TYPE, ...clause }] },
     limit: 10,
@@ -109,26 +113,26 @@ function search(token: string, clause: object): SearchResult {
 export function searchByTrackingId(
   token: string,
   trackingId: string
-): SearchResult {
+): SearchResult | null {
   return search(token, { trackingId: { type: 'exact', term: trackingId } })
 }
 
 /** BRN = registration number assigned at the REGISTERED step. */
-export function searchByBRN(token: string, brn: string): SearchResult {
+export function searchByBRN(token: string, brn: string): SearchResult | null {
   return search(token, {
     'legalStatuses.REGISTERED.registrationNumber': { type: 'exact', term: brn }
   })
 }
 
 /** Fuzzy match on applicant first/surname (tennis-club proxy for name search). */
-export function searchByName(token: string, name: string): SearchResult {
+export function searchByName(token: string, name: string): SearchResult | null {
   return search(token, {
     data: { 'applicant.name': { type: 'fuzzy', term: name } }
   })
 }
 
 /** Exact match on recommender.id (tennis-club proxy for NID). */
-export function searchByNID(token: string, nid: string): SearchResult {
+export function searchByNID(token: string, nid: string): SearchResult | null {
   return search(token, {
     data: { 'recommender.id': { type: 'exact', term: nid } }
   })
@@ -139,7 +143,7 @@ export function searchByDoBAndName(
   token: string,
   dob: string,
   name: string
-): SearchResult {
+): SearchResult | null {
   return search(token, {
     data: {
       'applicant.dob': { type: 'exact', term: dob },
@@ -158,12 +162,12 @@ export type EventStatus =
 export function searchByStatus(
   token: string,
   status: EventStatus
-): SearchResult {
+): SearchResult | null {
   return search(token, { status: { type: 'exact', term: status } })
 }
 
 /** flag — e.g. 'rejected', 'incomplete', 'correction-requested', 'potential-duplicate'. */
-export function searchByFlag(token: string, flag: string): SearchResult {
+export function searchByFlag(token: string, flag: string): SearchResult | null {
   return search(token, { flags: { anyOf: [flag] } })
 }
 
