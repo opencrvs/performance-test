@@ -54,7 +54,7 @@ export default function () {
   const searchResult = searchByTrackingId(token, event.trackingId)
 
   check(searchResult, {
-    'search: event found': (r) => r?.total > 0
+    'search: event found': (r) => (r?.total ?? 0) > 0
   })
 
   // ── Step 4: Assign to self ────────────────────────────────────────────────

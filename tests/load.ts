@@ -34,10 +34,6 @@ import { productionThresholds } from '../src/thresholds'
 // ─── Ramp stages ──────────────────────────────────────────────────────────────
 
 /**
- * Hard ceiling on VU count. Override via MAX_VUS env var to stay within
- * Grafana Cloud project limits when running locally (free tier = 100 VUs).
- * k8s runs leave this unset and get the full 300.
- *
  *   MAX_VUS=100 yarn test:load:cloud   # local cloud run
  *   yarn test:load                      # local run, uncapped
  */
@@ -136,7 +132,7 @@ function runWorkflow(highLatency: boolean): void {
 
   // Step 3: Quick search by tracking ID
   const result = searchByTrackingId(token, event.trackingId)
-  check(result, { 'search: event found': (r) => r?.total > 0 })
+  check(result, { 'search: event found': (r) => (r?.total ?? 0) > 0 })
   networkDelay()
 
   // Step 4: Assign to self
