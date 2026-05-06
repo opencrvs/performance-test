@@ -1,18 +1,20 @@
 /**
  * Soak test — validates system stability under sustained production-equivalent
- * load over a full 8-hour working day.
+ * load over a long-running session.
  *
  * VU workflow (per iteration):
  *   create event → declare → quick search → assign to self → register
  *
  * Load profile:
- *   50 constant VUs (40 normal + 10 high-latency) for 8 hours.
+ *   50 constant VUs (40 normal + 10 high-latency) for 5 hours. The duration
+ *   fits inside the 6-hour GitHub-hosted runner job ceiling with headroom for
+ *   build, setup, and summary.
  *   Think time is randomised to 115–175 s per iteration so each VU completes
  *   one full workflow in 2–3 minutes, sustaining ~20 events/minute — matching
  *   the 1.5× production target (~21/min) from the README.
  *
  * Pass criteria:
- *   - All production response time thresholds hold for the full 8-hour duration.
+ *   - All production response time thresholds hold for the full duration.
  *   - Error rate stays below 0.1%.
  *   - Memory consumption must plateau; a sustained upward trend fails the run
  *     (checked via infrastructure health monitoring — Section 2 of the test plan).
@@ -55,21 +57,21 @@ export const options: Options = {
     normal: {
       executor: 'constant-vus',
       vus: NORMAL_VUS,
-      duration: '8h',
+      duration: '5h',
       exec: 'normalVU'
     },
     /** 20% of VUs — 200–500 ms artificial RTT delay per workflow step. */
     highLatency: {
       executor: 'constant-vus',
       vus: HIGH_LATENCY_VUS,
-      duration: '8h',
+      duration: '5h',
       exec: 'highLatencyVU'
     },
     /** 10% of VUs — standalone user lookups to measure read-path SLO. */
     userLookup: {
       executor: 'constant-vus',
       vus: USER_LOOKUP_VUS,
-      duration: '8h',
+      duration: '5h',
       exec: 'userLookupVU'
     }
   },
@@ -78,9 +80,6 @@ export const options: Options = {
     ...productionThresholds
   }
 }
-
-// ─── Per-VU session ───────────────────────────────────────────────────────────
-
 
 // ─── Workflow ─────────────────────────────────────────────────────────────────
 
