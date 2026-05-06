@@ -6,9 +6,6 @@
  *
  * Override any value:
  *   EVENTS_URL=http://... GATEWAY_URL=http://... k6 run dist/smoke.js
- *
- * Cloud reporting (Grafana Cloud):
- *   k6 run --out cloud dist/smoke.js   (requires K6_CLOUD_TOKEN env var)
  */
 export const config = {
   /** Base URL for the events tRPC API, e.g. http://localhost:3000/api/events */
