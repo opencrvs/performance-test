@@ -1,0 +1,27 @@
+image:
+  repository: ghcr.io/opencrvs/opencrvs-perf-test
+  tag: latest
+  pullPolicy: Always
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+job:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 3600
+
+resources: {}
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Optional: override command/args if your image does not already have the right entrypoint
+command: []
+args: []
+
+k6_script: "smoke"
+
+k6_env_args:
+  GATEWAY_URL: "http://opencrvs-gateway:3000"

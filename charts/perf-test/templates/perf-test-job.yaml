@@ -1,0 +1,75 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "perf-test-generator.fullname" . }}-{{ .Release.Revision }}
+  labels:
+    app.kubernetes.io/name: {{ include "perf-test-generator.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  backoffLimit: {{ .Values.job.backoffLimit }}
+  ttlSecondsAfterFinished: {{ .Values.job.ttlSecondsAfterFinished }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "perf-test-generator.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      restartPolicy: Never
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: generator
+          command:
+          {{- if .Values.command }}
+            {{- toYaml .Values.command | nindent 10 }}
+          {{- else }}
+            ["k6"]
+          {{- end }}
+          args:
+          {{- if .Values.command }}
+            {{- toYaml .Values.command | nindent 10 }}
+          {{- else }}
+            - run
+            - /app/{{ .Values.k6_script }}.js
+          {{- if .Values.k6_output }}
+            - --out
+            - {{ .Values.k6_output }}
+          {{- end }}
+          {{- range $k, $v := .Values.k6_env_args }}
+            - -e
+            - {{ $k }}={{ $v }}
+          {{- end }}
+          {{- end }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          {{- range $k, $v := .Values.env }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+          {{- end }}
+          {{- range $secretName, $mappings := .Values.perf_test.secrets }}
+          {{- range $mappings }}
+          {{- $parts := splitList ":" . }}
+            - name: {{ index $parts 1 }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $secretName }}
+                  key: {{ index $parts 0 }}
+          {{- end }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

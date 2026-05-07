@@ -1,0 +1,31 @@
+FROM node:22-slim AS base
+
+RUN apt-get update && apt-get upgrade -y
+
+RUN apt-get clean && \
+    rm -rf /var/cache/apt/archives /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY --chown=node:node *.json .
+COPY --chown=node:node yarn.lock .
+COPY --chown=node:node build.mjs .
+COPY --chown=node:node src ./src
+COPY --chown=node:node tests ./tests
+RUN yarn install && yarn build
+
+# Build the k6 binary with the elasticsearch output extension
+# See reference:
+# https://grafana.com/docs/k6/latest/results-output/real-time/elasticsearch/
+# https://hub.docker.com/r/grafana/xk6/
+FROM grafana/xk6:latest AS k6-builder
+WORKDIR /app
+RUN xk6 build --with github.com/elastic/xk6-output-elasticsearch
+RUN ls -la /app
+
+# Final image with k6 and test script
+FROM alpine:latest
+WORKDIR /app
+COPY --from=k6-builder /app/k6 /usr/bin/k6
+COPY --from=base /app/dist /app
+ENTRYPOINT ["/usr/bin/k6"]
