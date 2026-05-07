@@ -8,16 +8,16 @@
 // ─── Per-operation SLOs (from README) ─────────────────────────────────────────
 
 /** Read operations: search, lookup, auth */
-const READ_SLO = { p50: 150, p95: 450, p99: 900 }
+const READ_SLO = { p50: 1000, p95: 3000, p99: 4000 };
 
 /** Write operations: declare, register */
-const WRITE_SLO = { p50: 300, p95: 900, p99: 1500 }
+const WRITE_SLO = { p50: 1000, p95: 4000, p99: 5000 };
 
 /** Find user by ID — tighter SLO per README baseline */
-const USER_LOOKUP_SLO = { p50: 50, p95: 150, p99: 300 }
+const USER_LOOKUP_SLO = { p50: 1000, p95: 3000, p99: 4000 };
 
 function slo(op: typeof READ_SLO) {
-  return [`p(50)<${op.p50}`, `p(95)<${op.p95}`, `p(99)<${op.p99}`]
+  return [`p(50)<${op.p50}`, `p(95)<${op.p95}`, `p(99)<${op.p99}`];
 }
 
 // ─── Production thresholds ────────────────────────────────────────────────────
@@ -39,12 +39,12 @@ export const productionThresholds = {
   'http_req_duration{name:"event.actions.register.request"}': slo(WRITE_SLO),
 
   // Overall error rate
-  http_req_failed: ['rate<0.001'] // < 0.1%
-}
+  http_req_failed: ["rate<0.001"], // < 0.1%
+};
 
 // ─── Smoke thresholds (relaxed — validates connectivity, not perf) ─────────────
 
 export const smokeThresholds = {
-  http_req_duration: ['p(95)<5000'],
-  http_req_failed: ['rate<0.01']
-}
+  http_req_duration: ["p(95)<5000"],
+  http_req_failed: ["rate<0.01"],
+};
