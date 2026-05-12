@@ -22,15 +22,15 @@ Searches, lookups, and queries backed by Elasticsearch or PostgreSQL indexes.
 
 | Operation                  | p50   | p95    | p99    |
 | -------------------------- | ----- | ------ | ------ |
-| Authenticate user          | 50ms  | 150ms  | 300ms  |
-| Search event by ID         | 50ms  | 150ms  | 300ms  |
-| Search with BRN            | 50ms  | 150ms  | 300ms  |
-| Search with name           | 50ms  | 150ms  | 300ms  |
-| Search with NID            | 50ms  | 150ms  | 300ms  |
-| Search by DoB and name     | 50ms  | 150ms  | 300ms  |
-| Search by record status    | 50ms  | 150ms  | 300ms  |
-| Search by flag             | 50ms  | 150ms  | 300ms  |
-| Find user by ID            | 50ms  | 150ms  | 300ms  |
+| Authenticate user          | 1000ms  | 3000ms  | 4000ms  |
+| Search event by ID         | 1000ms  | 3000ms  | 4000ms  |
+| Search with BRN            | 1000ms  | 3000ms  | 4000ms  |
+| Search with name           | 1000ms  | 3000ms  | 4000ms  |
+| Search with NID            | 1000ms  | 3000ms  | 4000ms  |
+| Search by DoB and name     | 1000ms | 3000ms  | 4000ms  |
+| Search by record status    | 1000ms | 3000ms  | 4000ms  |
+| Search by flag             | 1000ms | 3000ms  | 4000ms  |
+| Find user by ID            | 1000ms | 3000ms  | 4000ms  |
 
 > The advanced search query to be used as benchmark is to be defined.
 
@@ -40,9 +40,9 @@ Includes the database write and synchronous event handling. Country config is co
 
 | Operation              | p50    | p95    | p99    |
 | ---------------------- | ------ | ------ | ------ |
-| Create declare action  | 100ms  | 300ms  | 500ms  |
-| Register event         | 100ms  | 300ms  | 500ms  |
-| Upload an attachment   | 100ms  | 300ms  | 500ms  |
+| Create declare action  | 1000ms  | 4000ms  | 5000ms  |
+| Register event         | 1000ms  | 4000ms  | 5000ms  |
+| Upload an attachment   | 1000ms  | 4000ms  | 5000ms  |
 
 ### Reindexing
 
