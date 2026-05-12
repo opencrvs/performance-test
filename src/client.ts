@@ -232,284 +232,304 @@ export function workqueueCount(
   userId: string,
   locationId: string
 ): void {
-  const res = http.post(
-    `${config.eventsUrl}/workqueue.count?batch=1`,
-    JSON.stringify({
-      "0": {
-        json: [
+  const slugs = [
+    {
+      slug: "assigned-to-you",
+      query: {
+        type: "and",
+        clauses: [
           {
-            slug: "assigned-to-you",
-            query: {
-              type: "and",
-              clauses: [
-                {
-                  assignedTo: { type: "exact", term: userId },
-                  createdBy: null,
-                  updatedBy: null,
-                  updatedByUserRole: null,
-                  createdAtLocation: null,
-                  updatedAtLocation: null,
-                  "legalStatuses.DECLARED.createdAtLocation": null,
-                  "legalStatuses.REGISTERED.createdAtLocation": null,
-                },
-              ],
-            },
-          },
-          {
-            slug: "recent",
-            query: {
-              type: "and",
-              clauses: [
-                {
-                  updatedAt: { type: "timePeriod", term: "last7Days" },
-                  updatedBy: { type: "exact", term: userId },
-                  assignedTo: null,
-                  createdBy: null,
-                  updatedByUserRole: null,
-                  createdAtLocation: null,
-                  updatedAtLocation: null,
-                  "legalStatuses.DECLARED.createdAtLocation": null,
-                  "legalStatuses.REGISTERED.createdAtLocation": null,
-                },
-              ],
-            },
-          },
-          {
-            slug: "requires-completion",
-            query: {
-              type: "and",
-              clauses: [
-                {
-                  updatedAtLocation: { type: "within", location: locationId },
-                  flags: { anyOf: ["incomplete"], noneOf: ["rejected"] },
-                  assignedTo: null,
-                  createdBy: null,
-                  updatedBy: null,
-                  updatedByUserRole: null,
-                  createdAtLocation: null,
-                  "legalStatuses.DECLARED.createdAtLocation": null,
-                  "legalStatuses.REGISTERED.createdAtLocation": null,
-                },
-              ],
-            },
-          },
-          {
-            slug: "potential-duplicate",
-            query: {
-              type: "and",
-              clauses: [
-                {
-                  "legalStatuses.DECLARED.createdAtLocation": {
-                    type: "within",
-                    location: locationId,
-                  },
-                  flags: { anyOf: ["potential-duplicate"] },
-                  assignedTo: null,
-                  createdBy: null,
-                  updatedBy: null,
-                  updatedByUserRole: null,
-                  createdAtLocation: null,
-                  updatedAtLocation: null,
-                  "legalStatuses.REGISTERED.createdAtLocation": null,
-                },
-              ],
-            },
-          },
-          {
-            slug: "pending-updates",
-            query: {
-              type: "and",
-              clauses: [
-                {
-                  createdAtLocation: { type: "within", location: locationId },
-                  flags: { anyOf: ["rejected"] },
-                  assignedTo: null,
-                  createdBy: null,
-                  updatedBy: null,
-                  updatedByUserRole: null,
-                  updatedAtLocation: null,
-                  "legalStatuses.DECLARED.createdAtLocation": null,
-                  "legalStatuses.REGISTERED.createdAtLocation": null,
-                },
-              ],
-            },
-          },
-          {
-            slug: "pending-approval",
-            query: {
-              type: "and",
-              clauses: [
-                {
-                  status: { type: "exact", term: "DECLARED" },
-                  "legalStatuses.DECLARED.createdAtLocation": {
-                    type: "within",
-                    location: locationId,
-                  },
-                  flags: {
-                    anyOf: ["approval-required-for-late-registration"],
-                    noneOf: ["potential-duplicate"],
-                  },
-                  assignedTo: null,
-                  createdBy: null,
-                  updatedBy: null,
-                  updatedByUserRole: null,
-                  createdAtLocation: null,
-                  updatedAtLocation: null,
-                  "legalStatuses.REGISTERED.createdAtLocation": null,
-                },
-              ],
-            },
-          },
-          {
-            slug: "pending-registration",
-            query: {
-              type: "and",
-              clauses: [
-                {
-                  status: { type: "exact", term: "DECLARED" },
-                  "legalStatuses.DECLARED.createdAtLocation": {
-                    type: "within",
-                    location: locationId,
-                  },
-                  flags: {
-                    anyOf: ["validated"],
-                    noneOf: [
-                      "approval-required-for-late-registration",
-                      "potential-duplicate",
-                    ],
-                  },
-                  assignedTo: null,
-                  createdBy: null,
-                  updatedBy: null,
-                  updatedByUserRole: null,
-                  createdAtLocation: null,
-                  updatedAtLocation: null,
-                  "legalStatuses.REGISTERED.createdAtLocation": null,
-                },
-              ],
-            },
-          },
-          {
-            slug: "escalated",
-            query: {
-              type: "and",
-              clauses: [
-                {
-                  createdAtLocation: { type: "within", location: locationId },
-                  flags: {
-                    anyOf: [
-                      "escalated-to-registrar-general",
-                      "escalated-to-provincial-registrar",
-                    ],
-                  },
-                  assignedTo: null,
-                  createdBy: null,
-                  updatedBy: null,
-                  updatedByUserRole: null,
-                  updatedAtLocation: null,
-                  "legalStatuses.DECLARED.createdAtLocation": null,
-                  "legalStatuses.REGISTERED.createdAtLocation": null,
-                },
-              ],
-            },
-          },
-          {
-            slug: "in-external-validation",
-            query: {
-              type: "and",
-              clauses: [
-                {
-                  updatedAtLocation: { type: "within", location: locationId },
-                  flags: { anyOf: ["register:requested"] },
-                  assignedTo: null,
-                  createdBy: null,
-                  updatedBy: null,
-                  updatedByUserRole: null,
-                  createdAtLocation: null,
-                  "legalStatuses.DECLARED.createdAtLocation": null,
-                  "legalStatuses.REGISTERED.createdAtLocation": null,
-                },
-              ],
-            },
-          },
-          {
-            slug: "pending-certification",
-            query: {
-              type: "and",
-              clauses: [
-                {
-                  "legalStatuses.REGISTERED.createdAtLocation": {
-                    type: "within",
-                    location: locationId,
-                  },
-                  flags: {
-                    anyOf: ["pending-first-certificate-issuance"],
-                    noneOf: ["revoked", "correction-requested"],
-                  },
-                  assignedTo: null,
-                  createdBy: null,
-                  updatedBy: null,
-                  updatedByUserRole: null,
-                  createdAtLocation: null,
-                  updatedAtLocation: null,
-                  "legalStatuses.DECLARED.createdAtLocation": null,
-                },
-              ],
-            },
-          },
-          {
-            slug: "pending-issuance",
-            query: {
-              type: "and",
-              clauses: [
-                {
-                  "legalStatuses.REGISTERED.createdAtLocation": {
-                    type: "within",
-                    location: locationId,
-                  },
-                  flags: {
-                    anyOf: ["certified-copy-printed-in-advance-of-issuance"],
-                    noneOf: ["revoked", "correction-requested"],
-                  },
-                  assignedTo: null,
-                  createdBy: null,
-                  updatedBy: null,
-                  updatedByUserRole: null,
-                  createdAtLocation: null,
-                  updatedAtLocation: null,
-                  "legalStatuses.DECLARED.createdAtLocation": null,
-                },
-              ],
-            },
-          },
-          {
-            slug: "correction-requested",
-            query: {
-              type: "and",
-              clauses: [
-                {
-                  "legalStatuses.REGISTERED.createdAtLocation": {
-                    type: "within",
-                    location: locationId,
-                  },
-                  flags: {
-                    anyOf: ["correction-requested"],
-                    noneOf: ["revoked"],
-                  },
-                  assignedTo: null,
-                  createdBy: null,
-                  updatedBy: null,
-                  updatedByUserRole: null,
-                  createdAtLocation: null,
-                  updatedAtLocation: null,
-                  "legalStatuses.DECLARED.createdAtLocation": null,
-                },
-              ],
-            },
+            assignedTo: { type: "exact", term: userId },
+            createdBy: null,
+            updatedBy: null,
+            updatedByUserRole: null,
+            createdAtLocation: null,
+            updatedAtLocation: null,
+            "legalStatuses.DECLARED.createdAtLocation": null,
+            "legalStatuses.REGISTERED.createdAtLocation": null,
           },
         ],
       },
-    }),
+    },
+    {
+      slug: "recent",
+      query: {
+        type: "and",
+        clauses: [
+          {
+            updatedAt: { type: "timePeriod", term: "last7Days" },
+            updatedBy: { type: "exact", term: userId },
+            assignedTo: null,
+            createdBy: null,
+            updatedByUserRole: null,
+            createdAtLocation: null,
+            updatedAtLocation: null,
+            "legalStatuses.DECLARED.createdAtLocation": null,
+            "legalStatuses.REGISTERED.createdAtLocation": null,
+          },
+        ],
+      },
+    },
+    {
+      slug: "requires-completion",
+      query: {
+        type: "and",
+        clauses: [
+          {
+            updatedAtLocation: { type: "within", location: locationId },
+            flags: { anyOf: ["incomplete"], noneOf: ["rejected"] },
+            assignedTo: null,
+            createdBy: null,
+            updatedBy: null,
+            updatedByUserRole: null,
+            createdAtLocation: null,
+            "legalStatuses.DECLARED.createdAtLocation": null,
+            "legalStatuses.REGISTERED.createdAtLocation": null,
+          },
+        ],
+      },
+    },
+    {
+      slug: "potential-duplicate",
+      query: {
+        type: "and",
+        clauses: [
+          {
+            "legalStatuses.DECLARED.createdAtLocation": {
+              type: "within",
+              location: locationId,
+            },
+            flags: { anyOf: ["potential-duplicate"] },
+            assignedTo: null,
+            createdBy: null,
+            updatedBy: null,
+            updatedByUserRole: null,
+            createdAtLocation: null,
+            updatedAtLocation: null,
+            "legalStatuses.REGISTERED.createdAtLocation": null,
+          },
+        ],
+      },
+    },
+    {
+      slug: "pending-updates",
+      query: {
+        type: "and",
+        clauses: [
+          {
+            createdAtLocation: { type: "within", location: locationId },
+            flags: { anyOf: ["rejected"] },
+            assignedTo: null,
+            createdBy: null,
+            updatedBy: null,
+            updatedByUserRole: null,
+            updatedAtLocation: null,
+            "legalStatuses.DECLARED.createdAtLocation": null,
+            "legalStatuses.REGISTERED.createdAtLocation": null,
+          },
+        ],
+      },
+    },
+    {
+      slug: "pending-approval",
+      query: {
+        type: "and",
+        clauses: [
+          {
+            status: { type: "exact", term: "DECLARED" },
+            "legalStatuses.DECLARED.createdAtLocation": {
+              type: "within",
+              location: locationId,
+            },
+            flags: {
+              anyOf: ["approval-required-for-late-registration"],
+              noneOf: ["potential-duplicate"],
+            },
+            assignedTo: null,
+            createdBy: null,
+            updatedBy: null,
+            updatedByUserRole: null,
+            createdAtLocation: null,
+            updatedAtLocation: null,
+            "legalStatuses.REGISTERED.createdAtLocation": null,
+          },
+        ],
+      },
+    },
+    {
+      slug: "pending-registration",
+      query: {
+        type: "and",
+        clauses: [
+          {
+            status: { type: "exact", term: "DECLARED" },
+            "legalStatuses.DECLARED.createdAtLocation": {
+              type: "within",
+              location: locationId,
+            },
+            flags: {
+              anyOf: ["validated"],
+              noneOf: [
+                "approval-required-for-late-registration",
+                "potential-duplicate",
+              ],
+            },
+            assignedTo: null,
+            createdBy: null,
+            updatedBy: null,
+            updatedByUserRole: null,
+            createdAtLocation: null,
+            updatedAtLocation: null,
+            "legalStatuses.REGISTERED.createdAtLocation": null,
+          },
+        ],
+      },
+    },
+    {
+      slug: "escalated",
+      query: {
+        type: "and",
+        clauses: [
+          {
+            createdAtLocation: { type: "within", location: locationId },
+            flags: {
+              anyOf: [
+                "escalated-to-registrar-general",
+                "escalated-to-provincial-registrar",
+              ],
+            },
+            assignedTo: null,
+            createdBy: null,
+            updatedBy: null,
+            updatedByUserRole: null,
+            updatedAtLocation: null,
+            "legalStatuses.DECLARED.createdAtLocation": null,
+            "legalStatuses.REGISTERED.createdAtLocation": null,
+          },
+        ],
+      },
+    },
+    {
+      slug: "in-external-validation",
+      query: {
+        type: "and",
+        clauses: [
+          {
+            updatedAtLocation: { type: "within", location: locationId },
+            flags: { anyOf: ["register:requested"] },
+            assignedTo: null,
+            createdBy: null,
+            updatedBy: null,
+            updatedByUserRole: null,
+            createdAtLocation: null,
+            "legalStatuses.DECLARED.createdAtLocation": null,
+            "legalStatuses.REGISTERED.createdAtLocation": null,
+          },
+        ],
+      },
+    },
+    {
+      slug: "pending-certification",
+      query: {
+        type: "and",
+        clauses: [
+          {
+            "legalStatuses.REGISTERED.createdAtLocation": {
+              type: "within",
+              location: locationId,
+            },
+            flags: {
+              anyOf: ["pending-first-certificate-issuance"],
+              noneOf: ["revoked", "correction-requested"],
+            },
+            assignedTo: null,
+            createdBy: null,
+            updatedBy: null,
+            updatedByUserRole: null,
+            createdAtLocation: null,
+            updatedAtLocation: null,
+            "legalStatuses.DECLARED.createdAtLocation": null,
+          },
+        ],
+      },
+    },
+    {
+      slug: "pending-issuance",
+      query: {
+        type: "and",
+        clauses: [
+          {
+            "legalStatuses.REGISTERED.createdAtLocation": {
+              type: "within",
+              location: locationId,
+            },
+            flags: {
+              anyOf: ["certified-copy-printed-in-advance-of-issuance"],
+              noneOf: ["revoked", "correction-requested"],
+            },
+            assignedTo: null,
+            createdBy: null,
+            updatedBy: null,
+            updatedByUserRole: null,
+            createdAtLocation: null,
+            updatedAtLocation: null,
+            "legalStatuses.DECLARED.createdAtLocation": null,
+          },
+        ],
+      },
+    },
+    {
+      slug: "correction-requested",
+      query: {
+        type: "and",
+        clauses: [
+          {
+            "legalStatuses.REGISTERED.createdAtLocation": {
+              type: "within",
+              location: locationId,
+            },
+            flags: { anyOf: ["correction-requested"], noneOf: ["revoked"] },
+            assignedTo: null,
+            createdBy: null,
+            updatedBy: null,
+            updatedByUserRole: null,
+            createdAtLocation: null,
+            updatedAtLocation: null,
+            "legalStatuses.DECLARED.createdAtLocation": null,
+          },
+        ],
+      },
+    },
+  ];
+
+  // Build SuperJSON meta.values — every null field needs an ["undefined"] entry
+  const NULL_FIELDS = [
+    "assignedTo",
+    "createdBy",
+    "updatedBy",
+    "updatedByUserRole",
+    "createdAtLocation",
+    "updatedAtLocation",
+    "legalStatuses.DECLARED.createdAtLocation",
+    "legalStatuses.REGISTERED.createdAtLocation",
+  ];
+
+  const values: Record<string, string[]> = {};
+  slugs.forEach((slug, i) => {
+    const clause = slug.query.clauses[0];
+    NULL_FIELDS.forEach((field) => {
+      if (
+        field in clause &&
+        (clause as Record<string, unknown>)[field] === null
+      ) {
+        values[`${i}.query.clauses.0.${field}`] = ["undefined"];
+      }
+    });
+  });
+
+  const res = http.post(
+    `${config.eventsUrl}/workqueue.count?batch=1`,
+    JSON.stringify({ "0": { json: slugs, meta: { values } } }),
     { headers: headers(token), tags: { name: "workqueue.count" } }
   );
   check(res, { "workqueue.count: 200": (r) => r.status === 200 });
@@ -550,6 +570,19 @@ export function workqueueSearch(token: string, locationId: string): void {
           offset: 0,
           limit: 10,
           sort: [{ field: "updatedAt", direction: "desc" }],
+        },
+        meta: {
+          values: {
+            "query.clauses.0.assignedTo": ["undefined"],
+            "query.clauses.0.createdBy": ["undefined"],
+            "query.clauses.0.updatedBy": ["undefined"],
+            "query.clauses.0.updatedByUserRole": ["undefined"],
+            "query.clauses.0.createdAtLocation": ["undefined"],
+            "query.clauses.0.updatedAtLocation": ["undefined"],
+            "query.clauses.0.legalStatuses.REGISTERED.createdAtLocation": [
+              "undefined",
+            ],
+          },
         },
       },
     }),
