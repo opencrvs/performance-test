@@ -49,6 +49,7 @@ spec:
             - name: {{ $k }}
               value: {{ $v | quote }}
           {{- end }}
+          {{- if and .Values.perf_test .Values.perf_test.secrets }}
           {{- range $secretName, $mappings := .Values.perf_test.secrets }}
           {{- range $mappings }}
           {{- $parts := splitList ":" . }}
@@ -57,6 +58,7 @@ spec:
                 secretKeyRef:
                   name: {{ $secretName }}
                   key: {{ index $parts 0 }}
+          {{- end }}
           {{- end }}
           {{- end }}
           resources:
