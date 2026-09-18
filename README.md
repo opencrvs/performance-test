@@ -2,7 +2,7 @@
 
 ## Setup
 
-- [Production-like](https://documentation.opencrvs.org/setup/3.-installation/3.3-set-up-a-server-hosted-environment#minimum-server-specifications) hardware configuration
+- [Production-like](https://documentation.opencrvs.org/technical/guides/installation/deploy-set-up-a-server-hosted-environment) hardware configuration
 - OpenCRVS 2.x
 - Database with 
   - 1,000,000 records (~10 actions each)

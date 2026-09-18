@@ -96,7 +96,7 @@ export function createEvent(token: string): EventRef | null {
 }
 
 export function getEvent(token: string, eventId: string): unknown {
-  const res = query(token, "event.get", { eventId });
+  const res = query(token, "event.get", { eventId, waitFor: false });
   return unwrap<unknown>(res);
 }
 
@@ -195,6 +195,7 @@ export function declareEvent(
     eventId,
     transactionId: uuidv4(),
     declaration,
+    waitFor: false,
   });
 }
 
@@ -209,6 +210,7 @@ export function assignEvent(
     transactionId: uuidv4(),
     assignedTo,
     declaration: {},
+    waitFor: false,
   });
 }
 
@@ -222,6 +224,7 @@ export function registerEvent(
     eventId,
     transactionId: uuidv4(),
     declaration,
+    waitFor: false,
   });
 }
 
