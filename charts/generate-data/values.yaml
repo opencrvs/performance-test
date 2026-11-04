@@ -1,5 +1,5 @@
 image:
-  repository: ghcr.io/opencrvs/opencrvs-perftest-data-generator
+  repository: ghcr.io/opencrvs/opencrvs-data-generator
   tag: latest
   pullPolicy: Always
 

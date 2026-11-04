@@ -86,14 +86,27 @@ function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-/** Generate a short alphanumeric tracking ID (8 chars, uppercase). */
+const TRACKING_ID_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+/** Random 3-char prefix, fixed for the lifetime of the process. */
+const TRACKING_ID_PREFIX = Array.from(
+  { length: 3 },
+  () => TRACKING_ID_CHARS[Math.floor(Math.random() * TRACKING_ID_CHARS.length)]
+).join("");
+
+let trackingIdCounter = 0;
+
+/**
+ * Generate a short alphanumeric tracking ID (8 chars, uppercase).
+ * Last 5 chars are a base-36 counter: tracking_id is UNIQUE and the batched
+ * insert has no retry, so one duplicate aborts the run.
+ */
 function generateTrackingId(): string {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let id = "";
-  for (let i = 0; i < 8; i++) {
-    id += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return id;
+  const suffix = (trackingIdCounter++)
+    .toString(36)
+    .toUpperCase()
+    .padStart(5, "0");
+  return `${TRACKING_ID_PREFIX}${suffix}`;
 }
 
 /** Generate a 12-char alphanumeric registration number like 47WDGH7FYFF3. */
