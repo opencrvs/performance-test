@@ -61,6 +61,7 @@ import {
 } from "../src/client";
 import { generateDeclaration } from "../src/data";
 import { productionThresholds } from "../src/thresholds";
+import baseline from "./load.baseline.json";
 
 // ─── Configuration ────────────────────────────────────────────────────────────
 
@@ -304,9 +305,60 @@ export function readerVU(): void {
 
 // ─── Summary ──────────────────────────────────────────────────────────────────
 
-export function handleSummary(data: unknown) {
+const baselineP95: Record<string, number> = baseline.p95;
+
+const formatChange = (now: number, base: number) => {
+  const percentage = Math.round(((now - base) / base) * 100);
+  return `${percentage > 0 ? "+" : ""}${percentage}%`;
+};
+
+type Metric = {
+  type: "counter" | "gauge" | "rate" | "trend";
+  values: Record<string, number>;
+};
+
+type SummaryData = {
+  metrics: Record<string, Metric>;
+};
+
+const ENDPOINT_PREFIX = 'http_req_duration{name:"' as const;
+type EndpointKey = `${typeof ENDPOINT_PREFIX}${string}"}`;
+
+const isEndpoint = (entry: [string, Metric]): entry is [EndpointKey, Metric] =>
+  entry[0].startsWith(ENDPOINT_PREFIX);
+
+const formatEndpoint = ([key, metric]: [EndpointKey, any]) => {
+  const name = key.slice(key.indexOf('"') + 1, -2);
+  const now = Math.round(metric.values["p(95)"]);
+  const base = baselineP95[name];
+
+  if (base === undefined) {
+    return `➖ ${name}  p95 ${now}ms (no baseline)`;
+  }
+
+  // Mark as a regression only when p95 is both 20% and 50ms slower than the baseline.
+  const isRegression = now - base > 50 && now > base * 1.2;
+
+  return `${isRegression ? "⚠️" : "✅"} ${name}  p95 ${now}ms (base ${base}ms, ${formatChange(now, base)})`;
+};
+const slackSummary = ({ metrics }: SummaryData) => {
+  const endpoints = Object.entries(metrics)
+    .filter(isEndpoint)
+    .map(formatEndpoint);
+
+  return [
+    `baseline: core ${baseline.core}, ${baseline.date}`,
+    ...endpoints,
+  ].join("\n");
+};
+
+export function handleSummary(data: SummaryData) {
   return {
-    stdout: textSummary(data, { indent: " ", enableColors: false }),
+    stdout:
+      textSummary(data, { indent: " ", enableColors: false }) +
+      "\n" +
+      JSON.stringify({ slack_summary: slackSummary(data) }) +
+      "\n",
     "summary.json": JSON.stringify(data),
   };
 }

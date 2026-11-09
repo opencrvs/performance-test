@@ -1,0 +1,18 @@
+{
+  "core": "v2.2.0",
+  "date": "2026-11-09",
+  "http_req_failed": 0.000049,
+  "p95": {
+    "auth.authenticate": 701,
+    "auth.verifyCode": 22,
+    "event.actions.assignment.assign": 1040,
+    "event.actions.declare.request": 1100,
+    "event.actions.register.request": 1100,
+    "event.create": 69,
+    "event.get": 83,
+    "event.search": 41,
+    "user.get": 40,
+    "workqueue.count": 44,
+    "workqueue.search": 25
+  }
+}
