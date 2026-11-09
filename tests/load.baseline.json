@@ -3,16 +3,16 @@
   "date": "2026-11-09",
   "http_req_failed": 0.000049,
   "p95": {
-    "auth.authenticate": 704.62,
-    "auth.verifyCode": 21.19,
-    "event.actions.assignment.assign": 106.29,
-    "event.actions.declare.request": 204.17,
-    "event.actions.register.request": 205.23,
+    "auth.authenticate": 705,
+    "auth.verifyCode": 21,
+    "event.actions.assignment.assign": 106,
+    "event.actions.declare.request": 204,
+    "event.actions.register.request": 205,
     "event.create": 69,
-    "event.get": 77.93,
-    "event.search": 38.47,
-    "user.get": 39.95,
-    "workqueue.count": 39.33,
-    "workqueue.search": 23.59
+    "event.get": 78,
+    "event.search": 38,
+    "user.get": 40,
+    "workqueue.count": 39,
+    "workqueue.search": 24
   }
 }
