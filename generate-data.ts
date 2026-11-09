@@ -493,7 +493,7 @@ async function main() {
 
         // Insert event
         eventValues.push(
-          `($${paramIdx++}, $${paramIdx++}, $${paramIdx++}, $${paramIdx++}, $${paramIdx++}, $${paramIdx++})`
+          `($${paramIdx++}, $${paramIdx++}, $${paramIdx++}, $${paramIdx++}, $${paramIdx++}, $${paramIdx++}, 'initial')`
         );
         eventParams.push(
           eventId,
@@ -602,7 +602,7 @@ async function main() {
 
       // Bulk-insert events
       await client.query(
-        `INSERT INTO app.events (id, event_type, transaction_id, tracking_id, created_at, updated_at)
+        `INSERT INTO app.events (id, event_type, transaction_id, tracking_id, created_at, updated_at, config_version_id)
          VALUES ${eventValues.join(", ")}`,
         eventParams
       );
