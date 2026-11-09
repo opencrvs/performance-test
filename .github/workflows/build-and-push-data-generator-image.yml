@@ -2,8 +2,8 @@ name: Build and Push Images
 
 on:
   push:
-    branches: ["*"]
-    tags: ["*"]
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
   build-and-push:
@@ -48,5 +48,9 @@ jobs:
       - name: Push Docker image
         run: |
           docker push ${{ env.image_path }}:${{ env.image_tag }}
+
+      - name: Push latest tag
+        if: github.ref == 'refs/heads/main'
+        run: |
           docker tag ${{ env.image_path }}:${{ env.image_tag }} ${{ env.image_path }}:latest
           docker push ${{ env.image_path }}:latest
