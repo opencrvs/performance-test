@@ -336,8 +336,8 @@ const formatEndpoint = ([key, metric]: [EndpointKey, any]) => {
     return `➖ ${name}  p95 ${now}ms (no baseline)`;
   }
 
-  // Mark as a regression only when p95 is both 20% and 50ms slower than the baseline.
-  const isRegression = now - base > 50 && now > base * 1.2;
+  // Mark as a regression only when p95 is either 20% or 50ms slower than the baseline.
+  const isRegression = now - base > 50 || now > base * 1.2;
 
   return `${isRegression ? "⚠️" : "✅"} ${name}  p95 ${now}ms (base ${base}ms, ${formatChange(now, base)})`;
 };
